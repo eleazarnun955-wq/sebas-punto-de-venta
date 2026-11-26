@@ -18,7 +18,7 @@ jobs:
           node --check --input-type=module < src/db.js
           node --check --input-type=module < src/backup.js
           node --check --input-type=module < src/operations.js
-          node --check --input-type=module < src/barcode-scanner.js
+          node --check --input-type=module < src/barcode-scanner.js\n          node --check --input-type=module < src/neon-auth.js
       - name: Run business logic tests
         run: node --experimental-default-type=module --test
 
@@ -33,11 +33,11 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: '21'
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
-          packages: platform-tools platforms;android-35 build-tools;35.0.0
+          packages: platform-tools platforms;android-36 build-tools;36.0.0
       - name: Install dependencies
         run: npm install
       - name: Prepare web assets
