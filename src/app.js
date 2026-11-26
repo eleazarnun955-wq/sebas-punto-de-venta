@@ -1,6 +1,7 @@
 import {init,get,save,list,activate,addBusiness,backup} from "./db.js";
 import {registerPurchase,adjustStock,refundSale,closeCash,saleNetTotal,saleNetUnits} from "./operations.js";
 import {validateBackup} from "./backup.js";
+import {initNeonAuth,nativeAuthAvailable,signInWithEmail,signUpWithEmail,signOutNeon} from "./neon-auth.js";
 let db=init(),cart=[];
 const $=s=>document.querySelector(s),esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])),money=n=>new Intl.NumberFormat("es-MX",{style:"currency",currency:db.settings.currency||"MXN"}).format(Number(n)||0),today=()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-")};
 function msg(s){const t=$("#toast");if(!t)return;t.textContent=s;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2400)}
@@ -38,5 +39,37 @@ $("#export-products").onclick=()=>downloadCsv("sebas-inventario.csv",[["Producto
 $("#print-last").onclick=()=>{const sale=db.sales.at(-1);if(!sale)return msg("Todavía no hay ventas.");const w=window.open("","_blank","width=360,height=600");if(!w)return msg("Permite ventanas emergentes para imprimir.");w.document.write('<html><head><title>Ticket '+esc(sale.folio)+'</title><style>body{font:14px monospace;padding:16px}h2{text-align:center}hr{border:0;border-top:1px dashed}</style></head><body><h2>SEBAS PUNTO DE VENTA</h2><p>'+esc(db.settings.name)+'</p><hr><p>'+esc(sale.folio)+'<br>'+new Date(sale.date).toLocaleString("es-MX")+'<br>'+esc(sale.customer)+'</p><hr>'+sale.items.map(i=>'<p>'+esc(i.name)+' × '+i.qty+'<br>'+money(i.price*i.qty)+'</p>').join("")+'<hr><h3>TOTAL: '+money(sale.total)+'</h3><p>Pago: '+esc(sale.payment)+'</p><p>¡Gracias por su compra!</p><script>window.onload=()=>window.print()<\\/script></body></html>');w.document.close()};
 $("#backup").onclick=()=>{const url=URL.createObjectURL(new Blob([backup()],{type:"application/json"})),a=document.createElement("a");a.href=url;a.download="sebas-pos-respaldo.json";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
 $("#restore-file").onchange=e=>{const file=e.target.files?.[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const data=JSON.parse(reader.result);const businesses=validateBackup(data);if(!confirm("Restaurar reemplazará los negocios guardados en este dispositivo. ¿Continuar?"))return;localStorage.setItem("sebas-pos-businesses-v1",JSON.stringify(businesses));localStorage.setItem("sebas-pos-active-v1",businesses[0].id);db=get();cart=[];render();page("home");msg("Respaldo restaurado correctamente.")}catch(err){msg(err.message||"No se pudo leer el respaldo.")}};reader.onerror=()=>msg("No se pudo leer el archivo.");reader.readAsText(file);e.target.value=""};
+
+function accountUI(session,available=true){
+  const status=$("#auth-status"),form=$("#auth-form"),out=$("#auth-signout");
+  if(!available){status.textContent="El acceso con cuenta se usa desde la aplicación Android. El modo local sigue disponible.";form.hidden=true;out.hidden=true;return}
+  if(session){status.textContent="Sesión iniciada: "+(session.user?.email||"cuenta activa");form.hidden=true;out.hidden=false}
+  else{status.textContent="No has iniciado sesión. Puedes crear tu cuenta gratuita o entrar con una existente.";form.hidden=false;out.hidden=true}
+}
+async function startAccountAuth(){
+  if(!nativeAuthAvailable()){accountUI(null,false);return}
+  try{const result=await initNeonAuth(session=>accountUI(session,true));accountUI(result.session,true)}
+  catch(error){$("#auth-status").textContent="No se pudo iniciar el servicio de cuenta: "+(error.message||"error de conexión");$("#auth-form").hidden=false;$("#auth-signout").hidden=true}
+}
+$("#auth-form").onsubmit=async e=>{
+  e.preventDefault();const email=$("#auth-email").value.trim(),password=$("#auth-password").value;
+  const button=$("#auth-signin");button.disabled=true;
+  try{const result=await signInWithEmail(email,password);accountUI(result.session,true);msg("Sesión iniciada correctamente.")}
+  catch(error){msg(error.message||"No se pudo iniciar sesión.")}
+  finally{button.disabled=false}
+};
+$("#auth-signup").onclick=async()=>{
+  const email=$("#auth-email").value.trim(),password=$("#auth-password").value,name=$("#auth-name").value.trim();
+  if(!email||password.length<8)return msg("Escribe un correo y una contraseña de al menos 8 caracteres.");
+  const button=$("#auth-signup");button.disabled=true;
+  try{const result=await signUpWithEmail(email,password,name);accountUI(result.session,true);msg(result.session?"Cuenta creada correctamente.":"Revisa tu correo para terminar el registro.")}
+  catch(error){msg(error.message||"No se pudo crear la cuenta.")}
+  finally{button.disabled=false}
+};
+$("#auth-signout").onclick=async()=>{
+  try{await signOutNeon();accountUI(null,true);msg("Sesión cerrada.")}
+  catch(error){msg(error.message||"No se pudo cerrar la sesión.")}
+};
+
 if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
 render();page("home");
