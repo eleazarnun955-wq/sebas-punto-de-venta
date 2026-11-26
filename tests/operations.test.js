@@ -1,4 +1,4 @@
-import test from "node:test";import assert from "node:assert/strict";import{registerPurchase,adjustStock,refundSale,closeCash}from"../src/operations.js";
+import test from "node:test";import assert from "node:assert/strict";import{registerPurchase,adjustStock,refundSale,closeCash,saleNetTotal,saleNetUnits}from"../src/operations.js";
 const base=()=>({products:[{id:"p1",name:"Café",stock:2,cost:5,price:10}],suppliers:[{id:"s1",name:"Proveedor"}],purchases:[],stockMovements:[],sales:[],cashClosures:[]});
 test("compra incrementa inventario y guarda movimiento",()=>{const d=base();const p=registerPurchase(d,{supplierId:"s1",items:[{productId:"p1",qty:3,cost:6}]});assert.equal(d.products[0].stock,5);assert.equal(p.total,18);assert.equal(d.stockMovements.length,1)});
 test("ajuste registra motivo y evita stock negativo",()=>{const d=base();adjustStock(d,{productId:"p1",qty:-1,reason:"Merma"});assert.equal(d.products[0].stock,1);assert.throws(()=>adjustStock(d,{productId:"p1",qty:-2,reason:"Error"}))});
@@ -7,3 +7,5 @@ test("cierre calcula efectivo y diferencia",()=>{const d=base();d.sales=[{date:n
 
 test("compra inválida no modifica existencias parcialmente",()=>{const d=base();assert.throws(()=>registerPurchase(d,{supplierId:"s1",items:[{productId:"p1",qty:2,cost:7},{productId:"no-existe",qty:1,cost:4}]}));assert.equal(d.products[0].stock,2);assert.equal(d.purchases.length,0)});
 test("devolución de tarjeta no descuenta efectivo en el corte",()=>{const d=base();d.products[0].stock=0;d.sales=[{id:"v2",folio:"V2",date:new Date().toISOString(),payment:"Tarjeta",total:20,items:[{id:"p1",name:"Café",price:20,cost:5,qty:1}]}];refundSale(d,"v2",{p1:1});const c=closeCash(d,{opening:50,closing:50});assert.equal(c.cashSales,0);assert.equal(c.refunds,0);assert.equal(c.expected,50)});
+
+test("totales netos descuentan devoluciones parciales y completas",()=>{const sale={total:50,items:[{qty:2}],refunds:[{total:10,items:[{qty:1}]}]};assert.equal(saleNetTotal(sale),40);assert.equal(saleNetUnits(sale),1);sale.refunds.push({total:40,items:[{qty:1}]});assert.equal(saleNetTotal(sale),0);assert.equal(saleNetUnits(sale),0)});
