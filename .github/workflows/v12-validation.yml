@@ -2,9 +2,9 @@ name: SEBAS POS v12 validation
 
 on:
   pull_request:
-    branches: [main, v12-mejoras-paralelas]
+    branches: [main]
   push:
-    branches: [main, v12-mejoras-paralelas]
+    branches: [main]
 
 permissions:
   contents: read
