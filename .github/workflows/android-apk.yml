@@ -10,6 +10,8 @@ on:
       - "package.json"
       - "capacitor.config.json"
       - ".github/workflows/android-apk.yml"
+permissions:
+  contents: write
 jobs:
   build-apk:
     runs-on: ubuntu-latest
@@ -45,3 +47,14 @@ jobs:
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 14
+
+      - name: Publish test APK release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: android-test-v1.0.0
+          name: SEBAS PUNTO DE VENTA Android 1.0.0 (pruebas)
+          body: APK de depuración para probar el funcionamiento en Android. No es una versión de producción firmada.
+          draft: false
+          prerelease: true
+          make_latest: false
+          files: android/app/build/outputs/apk/debug/app-debug.apk
