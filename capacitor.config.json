@@ -1,0 +1,9 @@
+{
+  "appId": "com.sebas.puntoventa",
+  "appName": "SEBAS PUNTO DE VENTA",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  }
+}
