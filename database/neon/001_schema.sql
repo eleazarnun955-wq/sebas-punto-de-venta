@@ -43,6 +43,7 @@ create table if not exists public.customers (
   phone text not null default '',
   email text not null default '',
   created_at timestamptz not null default now(),
+  unique (id, business_id, owner_id),
   foreign key (business_id, owner_id) references public.businesses(id, owner_id) on delete cascade
 );
 
@@ -54,6 +55,7 @@ create table if not exists public.suppliers (
   phone text not null default '',
   email text not null default '',
   created_at timestamptz not null default now(),
+  unique (id, business_id, owner_id),
   foreign key (business_id, owner_id) references public.businesses(id, owner_id) on delete cascade
 );
 
@@ -74,7 +76,7 @@ create table if not exists public.sales (
   unique (business_id, folio),
   unique (id, business_id, owner_id),
   foreign key (business_id, owner_id) references public.businesses(id, owner_id) on delete cascade,
-  foreign key (customer_id) references public.customers(id) on delete set null
+  foreign key (customer_id, business_id, owner_id) references public.customers(id, business_id, owner_id) on delete set null (customer_id)
 );
 
 create table if not exists public.sale_items (
@@ -88,7 +90,8 @@ create table if not exists public.sale_items (
   unit_price numeric(14,2) not null check (unit_price >= 0),
   unit_cost numeric(14,2) not null check (unit_cost >= 0),
   foreign key (business_id, owner_id) references public.businesses(id, owner_id) on delete cascade,
-  foreign key (sale_id, business_id, owner_id) references public.sales(id, business_id, owner_id) on delete cascade
+  foreign key (sale_id, business_id, owner_id) references public.sales(id, business_id, owner_id) on delete cascade,
+  foreign key (product_id, business_id, owner_id) references public.products(id, business_id, owner_id) on delete set null (product_id)
 );
 
 create table if not exists public.purchases (
@@ -102,8 +105,9 @@ create table if not exists public.purchases (
   purchased_at timestamptz not null default now(),
   total numeric(14,2) not null check (total >= 0),
   foreign key (business_id, owner_id) references public.businesses(id, owner_id) on delete cascade,
-  foreign key (supplier_id) references public.suppliers(id) on delete set null,
-  unique (business_id, folio)
+  foreign key (supplier_id, business_id, owner_id) references public.suppliers(id, business_id, owner_id) on delete set null (supplier_id),
+  unique (business_id, folio),
+  unique (id, business_id, owner_id)
 );
 
 create table if not exists public.purchase_items (
@@ -116,7 +120,8 @@ create table if not exists public.purchase_items (
   quantity integer not null check (quantity > 0),
   unit_cost numeric(14,2) not null check (unit_cost >= 0),
   foreign key (business_id, owner_id) references public.businesses(id, owner_id) on delete cascade,
-  foreign key (purchase_id) references public.purchases(id) on delete cascade
+  foreign key (purchase_id, business_id, owner_id) references public.purchases(id, business_id, owner_id) on delete cascade,
+  foreign key (product_id, business_id, owner_id) references public.products(id, business_id, owner_id) on delete set null (product_id)
 );
 
 create table if not exists public.stock_movements (
@@ -129,7 +134,8 @@ create table if not exists public.stock_movements (
   detail text not null default '',
   reference text not null default '',
   created_at timestamptz not null default now(),
-  foreign key (business_id, owner_id) references public.businesses(id, owner_id) on delete cascade
+  foreign key (business_id, owner_id) references public.businesses(id, owner_id) on delete cascade,
+  foreign key (product_id, business_id, owner_id) references public.products(id, business_id, owner_id) on delete set null (product_id)
 );
 
 create table if not exists public.cash_closures (
