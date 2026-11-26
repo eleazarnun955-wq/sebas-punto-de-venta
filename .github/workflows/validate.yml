@@ -19,6 +19,7 @@ jobs:
           node --check --input-type=module < src/backup.js
           node --check --input-type=module < src/operations.js
           node --check --input-type=module < src/barcode-scanner.js
+          node --check --input-type=module < src/neon-auth.js
       - name: Run business logic tests
         run: node --experimental-default-type=module --test
 
@@ -33,11 +34,11 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: "21"
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
-          packages: platform-tools platforms;android-35 build-tools;35.0.0
+          packages: platform-tools platforms;android-36 build-tools;36.0.0
       - name: Install dependencies
         run: npm install
       - name: Prepare web assets
@@ -50,10 +51,11 @@ jobs:
         working-directory: android
         shell: bash
         run: |
+          chmod +x gradlew
           for attempt in 1 2 3; do
             if ./gradlew assembleDebug; then exit 0; fi
             if [ "$attempt" -lt 3 ]; then
-              echo "Gradle failed (often a temporary Maven Central 429); retrying in $((attempt * 30)) seconds..."
+              echo "Retrying Gradle after a temporary dependency rate limit..."
               sleep $((attempt * 30))
             fi
           done
