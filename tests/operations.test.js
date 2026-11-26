@@ -1,0 +1,6 @@
+import test from "node:test";import assert from "node:assert/strict";import{registerPurchase,adjustStock,refundSale,closeCash}from"./src/operations.js";
+const base=()=>({products:[{id:"p1",name:"Café",stock:2,cost:5,price:10}],suppliers:[{id:"s1",name:"Proveedor"}],purchases:[],stockMovements:[],sales:[],cashClosures:[]});
+test("compra incrementa inventario y guarda movimiento",()=>{const d=base();const p=registerPurchase(d,{supplierId:"s1",items:[{productId:"p1",qty:3,cost:6}]});assert.equal(d.products[0].stock,5);assert.equal(p.total,18);assert.equal(d.stockMovements.length,1)});
+test("ajuste registra motivo y evita stock negativo",()=>{const d=base();adjustStock(d,{productId:"p1",qty:-1,reason:"Merma"});assert.equal(d.products[0].stock,1);assert.throws(()=>adjustStock(d,{productId:"p1",qty:-2,reason:"Error"}))});
+test("devolución parcial regresa unidades al inventario",()=>{const d=base();d.sales=[{id:"v1",folio:"V1",total:20,items:[{id:"p1",name:"Café",price:10,cost:5,qty:2}]}];const r=refundSale(d,"v1",{p1:1});assert.equal(r.total,10);assert.equal(d.products[0].stock,3)});
+test("cierre calcula efectivo y diferencia",()=>{const d=base();d.sales=[{date:new Date().toISOString(),payment:"Efectivo",total:50}];const c=closeCash(d,{opening:100,closing:150});assert.equal(c.expected,150);assert.equal(c.difference,0)});
