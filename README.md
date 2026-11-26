@@ -12,7 +12,11 @@ Sistema de punto de venta gratuito, adaptable y con operación local offline-fir
 - Catálogo con SKU, precio, costo, existencia y mínimo de stock.
 - Búsqueda de productos y control de existencias al cobrar.
 - Registro de ventas en efectivo, tarjeta y transferencia; cálculo de cambio para efectivo.
-- Clientes, historial y búsqueda por folio/cliente.
+- Clientes y proveedores, historial y búsqueda por folio/cliente.
+- Registro de compras a proveedores con incremento automático de existencias.
+- Ajustes de inventario (+/-) con motivo y bitácora de movimientos.
+- Devoluciones parciales o completas por folio, con restitución de existencias.
+- Corte de caja con efectivo esperado, devoluciones y diferencia contra el efectivo contado.
 - Reporte de ventas, utilidad estimada, unidades y formas de pago.
 - Impresión del último ticket desde el historial.
 - Exportación CSV de ventas e inventario.
