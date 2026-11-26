@@ -15,6 +15,13 @@ test("every tenant table is covered by owner-only RLS policy", () => {
   for (const table of tables) assert.match(sql, new RegExp("'" + table + "'"));
 });
 
+test("child records cannot reference another tenant's customers, suppliers, sales or products", () => {
+  assert.match(sql, /foreign key \(customer_id, business_id, owner_id\) references public\.customers\(id, business_id, owner_id\)/i);
+  assert.match(sql, /foreign key \(supplier_id, business_id, owner_id\) references public\.suppliers\(id, business_id, owner_id\)/i);
+  assert.match(sql, /foreign key \(purchase_id, business_id, owner_id\) references public\.purchases\(id, business_id, owner_id\)/i);
+  assert.match(sql, /foreign key \(product_id, business_id, owner_id\) references public\.products\(id, business_id, owner_id\)/i);
+});
+
 test("client roles receive no anonymous access and owner_id is JWT-derived", () => {
   assert.match(sql, /owner_id text not null default auth\.user_id\(\)/i);
   assert.doesNotMatch(sql, /to anonymous/i);
