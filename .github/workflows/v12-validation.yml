@@ -2,7 +2,7 @@ name: SEBAS POS v12 validation
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, v12-mejoras-paralelas]
   push:
     branches: [main, v12-mejoras-paralelas, v12-neon-backend]
 
