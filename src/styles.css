@@ -2,3 +2,11 @@
 .toolbar{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin:12px 0 16px}.toolbar input{max-width:320px;margin:0;flex:1}.toolbar button,.restore-label{background:#e8edf5;color:#26364f;border:0;border-radius:8px;padding:10px 13px;font-weight:650;cursor:pointer}.restore-label{display:inline-flex;align-items:center;gap:10px;margin-top:12px}.restore-label input{max-width:230px;margin:0;padding:4px;background:transparent}@media(max-width:520px){.toolbar{align-items:stretch}.toolbar>*{width:100%;max-width:none}}
 
 #business-logo{width:38px;height:38px;object-fit:contain;background:#fff;border-radius:8px;padding:2px}.restore-label input{font:12px system-ui}
+
+/* Lector de códigos de barras */
+.scanner-panel{max-width:720px;margin:16px auto;padding:16px;background:#fff;border:1px solid #dbe3ef;border-radius:14px;box-shadow:0 8px 28px #18223518}
+.scanner-head,.scan-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+#barcode-video{display:block;width:100%;max-height:360px;object-fit:cover;background:#101827;border-radius:10px}
+#scanner-status{font-size:14px;color:#435573}
+.scan-actions{justify-content:flex-start}
+@media(max-width:760px){.scanner-panel{margin:12px}.scan-actions button{width:100%}}
