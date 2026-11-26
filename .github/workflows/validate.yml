@@ -5,7 +5,7 @@ on:
   pull_request:
     branches: [main]
 jobs:
-  syntax:
+  syntax-and-tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -16,3 +16,6 @@ jobs:
         run: |
           node --check --input-type=module < src/app.js
           node --check --input-type=module < src/db.js
+          node --check --input-type=module < src/operations.js
+      - name: Run business logic tests
+        run: node --experimental-default-type=module --test
