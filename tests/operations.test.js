@@ -21,3 +21,5 @@ test("rechaza respaldo con negocio duplicado",()=>{const data=validBackup();data
 test("rechaza productos con identificadores duplicados",()=>{const data=validBackup();data.businesses[0].products.push({...data.businesses[0].products[0]});assert.throws(()=>validateBackup(data),/duplicados/)});
 test("rechaza ventas sin detalle o total numérico",()=>{const data=validBackup();data.businesses[0].sales=[{id:"s1",total:"no",items:[]}];assert.throws(()=>validateBackup(data),/venta incompleta/)});
 test("rechaza listas obligatorias con formato incorrecto",()=>{const data=validBackup();data.businesses[0].customers=null;assert.throws(()=>validateBackup(data),/customers/)});
+
+test("compra con varios productos actualiza todas las existencias",()=>{const d=base();d.products.push({id:"p2",name:"Pan",stock:1,cost:3,price:8});const p=registerPurchase(d,{supplierId:"s1",items:[{productId:"p1",qty:2,cost:6},{productId:"p2",qty:4,cost:4}]});assert.equal(p.items.length,2);assert.equal(p.total,28);assert.equal(d.products[0].stock,4);assert.equal(d.products[1].stock,5)});
