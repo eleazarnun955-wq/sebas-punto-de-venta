@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/prepare-web.mjs",
-    "android:sync": "cap sync android"
+    "android:sync": "cap sync android",
+    "test": "node --test"
   },
   "dependencies": {
     "@capacitor/android": "6.2.1",

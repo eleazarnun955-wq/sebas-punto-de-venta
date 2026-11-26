@@ -1,0 +1,25 @@
+name: SEBAS POS v12 validation
+
+on:
+  pull_request:
+    branches: [main, v12-mejoras-paralelas]
+  push:
+    branches: [main, v12-mejoras-paralelas]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Run unit tests
+        run: npm test
+      - name: Build web app
+        run: npm run build
